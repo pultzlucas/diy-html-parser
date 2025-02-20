@@ -1,9 +1,9 @@
-from parser_lib import parser
+from parser_lib.parser import Parser
 
 HTML_FILEPATH = '../html_files/001.html'
 
 def main():
-    parser.parse(HTML_FILEPATH)
+    ast = Parser(HTML_FILEPATH).parse()
 
 if __name__ == '__main__':
     main()

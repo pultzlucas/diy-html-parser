@@ -10,42 +10,37 @@ class Lexer:
         self.tokens = list[Token]()
         self.current_char = self.chars[self.cursor]
 
-    def scan(self) -> list[Token]:
-        while True:
-            if self.cursor == len(self.chars) - 1:
-                self.tokens.append(Token(type_=TokenType.EOF, value=''))
-                break
+    def next_token(self) -> Token:
+        if self.current_char is None:
+            return Token(type_=TokenType.EOF, value='')
 
-            if self.current_char == '>':
-                self.tokens.append(Token(type_=TokenType.GT, value='>'))
-                self.next_char()
-                continue
+        if self.current_char == '>':
+            self.next_char()
+            return Token(type_=TokenType.GT, value='>')
 
-            if self.current_char == '<':
-                self.tokens.append(Token(type_=TokenType.LT, value='<'))
-                self.next_char()
-                continue
+        if self.current_char == '<':
+            self.next_char()
+            return Token(type_=TokenType.LT, value='<')
 
-            if self.current_char == '/':
-                self.tokens.append(Token(type_=TokenType.BAR, value='/'))
-                self.next_char()
-                continue
+        if self.current_char == '/':
+            self.next_char()
+            return Token(type_=TokenType.BAR, value='/')
 
-            if self.current_char.isalpha() and self.chars[self.cursor - 1] == '<':
-                token_value = self.walk_chars_stream()
-                self.tokens.append(Token(type_=TokenType.TAG_ID, value=token_value))
-                continue
+        if self.current_char.isalpha() and (self.chars[self.cursor - 1] == '<' or self.chars[self.cursor - 1] == '/'):
+            stream = self.walk_chars_stream()
+            return Token(type_=TokenType.TAG_ID, value=stream)
 
-            if self.current_char.isalpha():
-                token_value = self.walk_chars_stream()
-                self.tokens.append(Token(type_=TokenType.TEXT, value=token_value))
-                continue
+        if self.current_char.isalpha():
+            stream = self.walk_chars_stream()
+            return Token(type_=TokenType.TEXT, value=stream)
 
-            raise SyntaxErrorException(line=self.line, column=self.column)
-
-        return self.tokens
+        raise SyntaxErrorException(line=self.line, column=self.column)
     
     def next_char(self):
+        if self.cursor == len(self.chars) - 1: # EOF
+            self.current_char = None
+            return
+
         self.cursor += 1
         self.column += 1
         self.current_char = self.chars[self.cursor]

@@ -4,3 +4,6 @@ html_files/*
 
 ## python cache
 **/__pycache__
+
+## anotations markdown
+questions.md
