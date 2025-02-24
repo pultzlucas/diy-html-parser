@@ -1,6 +1,6 @@
 from parser_lib.parser import Parser
 
-HTML_FILEPATH = '../html_files/001.html'
+HTML_FILEPATH = '../html_files/003.html'
 
 def main():
     ast = Parser(HTML_FILEPATH).parse()

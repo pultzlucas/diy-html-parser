@@ -14,6 +14,25 @@ class Lexer:
         if self.current_char is None:
             return Token(type_=TokenType.EOF, value='')
 
+        if self.current_char.isspace():
+            self.skip_whitespaces()
+
+        # TERMS
+        
+        if self.current_char.isalpha() and (self.see_behind() == '<' or self.see_behind() == '/'):
+            stream = self.walk_chars_stream()
+            return Token(type_=TokenType.TAG_ID, value=stream)
+
+        if self.current_char.isalpha():
+            stream = self.walk_chars_stream()
+            if self.current_char == '=':
+                return Token(type_=TokenType.ATTRIBUTE_KEY, value=stream)
+            if self.current_char == '"':
+                return Token(type_=TokenType.ATTRIBUTE_VALUE, value=stream)
+            return Token(type_=TokenType.TEXT, value=stream)
+        
+        # SYMBOLS
+
         if self.current_char == '>':
             self.next_char()
             return Token(type_=TokenType.GT, value='>')
@@ -25,14 +44,14 @@ class Lexer:
         if self.current_char == '/':
             self.next_char()
             return Token(type_=TokenType.BAR, value='/')
-
-        if self.current_char.isalpha() and (self.chars[self.cursor - 1] == '<' or self.chars[self.cursor - 1] == '/'):
-            stream = self.walk_chars_stream()
-            return Token(type_=TokenType.TAG_ID, value=stream)
-
-        if self.current_char.isalpha():
-            stream = self.walk_chars_stream()
-            return Token(type_=TokenType.TEXT, value=stream)
+        
+        if self.current_char == '=':
+            self.next_char()
+            return Token(type_=TokenType.EQUALS, value='=')
+        
+        if self.current_char == '"':
+            self.next_char()
+            return Token(type_=TokenType.DOUBLE_QUOTE, value='"')
 
         raise SyntaxErrorException(line=self.line, column=self.column)
     
@@ -51,15 +70,27 @@ class Lexer:
             self.next_char()
             return
 
-        if self.current_char == ' ': # skip whitespace
+    def skip_whitespaces(self):
+        while self.current_char is not None and self.current_char.isspace():
             self.next_char()
-            return
         
     def walk_chars_stream(self) -> str:
         text = str()
-        while True:
+        while self.current_char is not None and self.current_char.isalnum():
             text += self.current_char
             self.next_char()
-            if not self.current_char.isalpha():
-                break
         return text
+    
+    def see_ahead(self):
+        ahead_pos = self.cursor + 1
+        if ahead_pos > len(self.chars) - 1:
+            return None
+        else:
+            return self.chars[ahead_pos]
+        
+    def see_behind(self):
+        behind_pos = self.cursor - 1
+        if behind_pos > len(self.chars) - 1:
+            return None
+        else:
+            return self.chars[behind_pos]
