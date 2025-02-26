@@ -7,3 +7,6 @@ html_files/*
 
 ## anotations markdown
 questions.md
+
+## ast samples
+*/ast.json
